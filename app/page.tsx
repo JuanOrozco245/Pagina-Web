@@ -98,9 +98,9 @@ export default function Home() {
       <section className="brand-story section-pad" id="historia">
         <div className="story-visual reveal">
           <div className="story-image-main">
-            <img src="/images/catalog-corazon-bolsita.jpeg" alt="Detalles dorados de ZENIT Joyería" />
+            <img src="/images/zenit-atelier.jpg" alt="Atelier de ZENIT Joyería con herramientas y detalles dorados" />
           </div>
-          <div className="story-image-inset" aria-hidden="true"><img src="/images/soberano-bracelet.png" alt="" /></div>
+          <div className="story-image-inset" aria-hidden="true"><img src="/images/zenit-atelier-detail.jpg" alt="" /></div>
           <span className="story-caption">EL BRILLO ESTÁ EN LOS DETALLES</span>
         </div>
         <div className="story-copy reveal">
