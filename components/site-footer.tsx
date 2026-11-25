@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { ArrowUpRight, Camera, Gem, MessageCircle } from 'lucide-react'
 import { useCart } from '@/components/cart-provider'
+import { isAdminPath } from '@/lib/admin-routes'
 import { whatsappLink } from '@/lib/settings'
 
 const explore = [
@@ -23,6 +25,9 @@ const policies = [
 
 export function SiteFooter() {
   const { settings } = useCart()
+  const pathname = usePathname()
+  // El panel privado no lleva el pie de página de la tienda.
+  if (isAdminPath(pathname)) return null
 
   return (
     <footer className="site-footer">

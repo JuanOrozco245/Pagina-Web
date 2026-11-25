@@ -2,9 +2,8 @@
 
 # dependencies
 /node_modules
-/data/catalog.json
-/data/settings.json
-/data/pedidos.json
+# datos privados de la tienda: catálogo, pedidos, usuarios, claves e historial
+/data/
 /public/images/uploads/
 
 # next.js

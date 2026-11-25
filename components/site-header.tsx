@@ -5,8 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Gem, House, LayoutGrid, MessageCircle, ShoppingBag, Sparkles } from 'lucide-react'
 import { useCart } from '@/components/cart-provider'
-
-const ADMIN_PREFIXES = ['/admin', '/configuracion', '/inventario', '/pedidos', '/clientes', '/reportes', '/respaldo', '/login']
+import { isAdminPath } from '@/lib/admin-routes'
 
 export function SiteHeader() {
   const pathname = usePathname()
@@ -20,7 +19,7 @@ export function SiteHeader() {
     return () => window.removeEventListener('hashchange', update)
   }, [pathname])
 
-  if (ADMIN_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null
+  if (isAdminPath(pathname)) return null
 
   const links = [
     { href: '/', label: 'Inicio', icon: House, active: pathname === '/' && !hash },

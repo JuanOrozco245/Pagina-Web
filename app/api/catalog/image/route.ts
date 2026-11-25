@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { NextResponse } from 'next/server'
-import { requestHasValidSession } from '@/lib/auth'
+import { getSessionUser } from '@/lib/auth'
+import { registrar } from '@/lib/historial'
 
 export const runtime = 'nodejs'
 
@@ -20,7 +21,8 @@ function isLocalRequest(request: Request) {
 
 export async function POST(request: Request) {
   if (!isLocalRequest(request)) return NextResponse.json({ error: 'La carga de imágenes solo está disponible en tu equipo.' }, { status: 404 })
-  if (!requestHasValidSession(request)) return NextResponse.json({ error: 'Debes iniciar sesión en el panel para subir imágenes.' }, { status: 401 })
+  const user = getSessionUser(request)
+  if (!user) return NextResponse.json({ error: 'Debes iniciar sesión en el panel para subir imágenes.' }, { status: 401 })
   const formData = await request.formData()
   const file = formData.get('image')
   if (!(file instanceof File) || file.size === 0 || file.size > 5 * 1024 * 1024) {
@@ -33,5 +35,6 @@ export async function POST(request: Request) {
   const imageDirectory = path.join(process.cwd(), 'public', 'images', 'uploads')
   await fs.mkdir(imageDirectory, { recursive: true })
   await fs.writeFile(path.join(imageDirectory, filename), Buffer.from(await file.arrayBuffer()), { flag: 'wx' })
+  registrar(user, { tipo: 'imagen', accion: 'subió', resumen: 'Subió una imagen al catálogo.' })
   return NextResponse.json({ image: `/images/uploads/${filename}` })
 }

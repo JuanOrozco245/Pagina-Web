@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { NextResponse } from 'next/server'
-import { requestHasValidSession } from '@/lib/auth'
+import { getSessionUser } from '@/lib/auth'
+import { registrarPedidos } from '@/lib/historial'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -69,7 +70,7 @@ function validOrder(value: unknown): value is Pedido {
 
 export async function GET(request: Request) {
   if (!isLocalRequest(request)) return NextResponse.json({ error: 'Los pedidos locales solo están disponibles en tu equipo.' }, { status: 404 })
-  if (!requestHasValidSession(request)) return NextResponse.json({ error: 'Debes iniciar sesión en el panel para ver los pedidos.' }, { status: 401 })
+  if (!getSessionUser(request)) return NextResponse.json({ error: 'Debes iniciar sesión en el panel para ver los pedidos.' }, { status: 401 })
   try {
     return NextResponse.json(await readOrders(), { headers: { 'Cache-Control': 'no-store' } })
   } catch {
@@ -93,13 +94,16 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   if (!isLocalRequest(request)) return NextResponse.json({ error: 'Los pedidos locales solo están disponibles en tu equipo.' }, { status: 404 })
-  if (!requestHasValidSession(request)) return NextResponse.json({ error: 'Debes iniciar sesión en el panel para modificar los pedidos.' }, { status: 401 })
+  const user = getSessionUser(request)
+  if (!user) return NextResponse.json({ error: 'Debes iniciar sesión en el panel para modificar los pedidos.' }, { status: 401 })
   try {
     const value: unknown = await request.json()
     if (!Array.isArray(value) || value.length > 500 || !value.every(validOrder)) {
       return NextResponse.json({ error: 'Revisa los datos de los pedidos.' }, { status: 400 })
     }
+    const previous = await readOrders()
     await writeOrders(value)
+    registrarPedidos(user, previous, value)
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ error: 'No se pudieron guardar los pedidos.' }, { status: 500 })

@@ -2,7 +2,9 @@
 
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
+import { usePathname } from 'next/navigation'
 import { ArrowUpRight, Minus, Plus, ShoppingBag, X } from 'lucide-react'
+import { isAdminPath } from '@/lib/admin-routes'
 import { initialProducts, type Product } from '@/lib/catalog'
 import { finalPrice, initialSettings, whatsappLink, type Settings } from '@/lib/settings'
 
@@ -34,6 +36,7 @@ export function useCart() {
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
   const { data: products = initialProducts } = useSWR<Product[]>('/api/catalog', fetcher, { fallbackData: initialProducts, revalidateOnFocus: true })
   const { data: settings = initialSettings } = useSWR<Settings>('/api/settings', fetcher, { fallbackData: initialSettings, revalidateOnFocus: true })
   const [cart, setCart] = useState<CartLine[]>([])
@@ -112,7 +115,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   return (
     <CartContext.Provider value={value}>
       {children}
-      <button ref={bagButtonRef} className="floating-bag" onClick={() => setCartOpen(true)} aria-label={`Abrir carrito, ${count} artículos`}><ShoppingBag size={18} strokeWidth={1.4} /><span>{count}</span></button>
+      {!isAdminPath(pathname) && <button ref={bagButtonRef} className="floating-bag" onClick={() => setCartOpen(true)} aria-label={`Abrir carrito, ${count} artículos`}><ShoppingBag size={18} strokeWidth={1.4} /><span>{count}</span></button>}
       <div className={`drawer-backdrop ${cartOpen ? 'backdrop-visible' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true" />
       <aside className={`cart-drawer ${cartOpen ? 'drawer-open' : ''}`} role="dialog" aria-modal="true" aria-label="Tu bolsa" aria-hidden={!cartOpen} inert={!cartOpen}>
         <div className="drawer-header"><div><p className="eyebrow">ZENIT · TU SELECCIÓN</p><h2>Tu bolsa <span>({count})</span></h2></div><button ref={closeButtonRef} className="close-drawer" onClick={() => setCartOpen(false)} aria-label="Cerrar carrito"><X size={20} strokeWidth={1.3} /></button></div>

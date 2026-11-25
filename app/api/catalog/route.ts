@@ -2,8 +2,9 @@ import { randomUUID } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { NextResponse } from 'next/server'
-import { requestHasValidSession } from '@/lib/auth'
+import { getSessionUser } from '@/lib/auth'
 import { initialProducts, isCategory, type Product } from '@/lib/catalog'
+import { registrarCatalogo } from '@/lib/historial'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -62,7 +63,8 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   if (!isLocalRequest(request)) return NextResponse.json({ error: 'El catálogo editable solo está disponible en tu equipo.' }, { status: 404 })
-  if (!requestHasValidSession(request)) return NextResponse.json({ error: 'Debes iniciar sesión en el panel para modificar el catálogo.' }, { status: 401 })
+  const user = getSessionUser(request)
+  if (!user) return NextResponse.json({ error: 'Debes iniciar sesión en el panel para modificar el catálogo.' }, { status: 401 })
   try {
     const products: unknown = await request.json()
     if (!Array.isArray(products) || products.length > 500 || !products.every(validProduct)) {
@@ -70,10 +72,12 @@ export async function PUT(request: Request) {
     }
     const ids = new Set((products as Product[]).map((product) => product.id))
     if (ids.size !== products.length) return NextResponse.json({ error: 'Cada producto necesita un identificador único.' }, { status: 400 })
+    const previous = await readCatalog()
     await fs.mkdir(path.dirname(catalogPath), { recursive: true })
     const temporaryPath = `${catalogPath}.${randomUUID()}.tmp`
     await fs.writeFile(temporaryPath, JSON.stringify(products, null, 2), 'utf8')
     await fs.rename(temporaryPath, catalogPath)
+    registrarCatalogo(user, previous, products as Product[])
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ error: 'No se pudieron guardar los cambios.' }, { status: 500 })
