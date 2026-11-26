@@ -21,7 +21,7 @@ export function SiteHeader() {
   if (isAdminPath(pathname)) return null
 
   const links = [
-    { href: '/', label: 'Inicio', icon: House, active: pathname === '/' && !hash },
+    { href: '/', label: 'Inicio', icon: House, active: pathname === '/' && !hash, hideOnPhone: true },
     { href: '/productos', label: 'Catálogo', icon: LayoutGrid, active: pathname.startsWith('/productos'), primary: true },
     { href: '/#contacto', label: 'Contacto', icon: MessageCircle, active: pathname === '/' && hash === '#contacto' },
   ]
@@ -30,8 +30,8 @@ export function SiteHeader() {
     <header className="site-header">
       <Wordmark />
       <nav className="site-nav" aria-label="Navegación principal">
-        {links.map(({ href, label, icon: Icon, active, primary }) => (
-          <Link key={label} href={href} className={`site-nav-link ${active ? 'is-active' : ''} ${primary ? 'is-primary' : ''}`} aria-current={active ? 'page' : undefined}>
+        {links.map(({ href, label, icon: Icon, active, primary, hideOnPhone }) => (
+          <Link key={label} href={href} aria-label={label} className={`site-nav-link ${active ? 'is-active' : ''} ${primary ? 'is-primary' : ''} ${hideOnPhone ? 'hide-on-phone' : ''}`} aria-current={active ? 'page' : undefined}>
             <Icon size={15} strokeWidth={1.4} aria-hidden="true" />
             <span>{label}</span>
           </Link>

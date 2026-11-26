@@ -21,14 +21,15 @@ export default function ProductosPage() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Todos')
 
+  // Solo se ofrecen los filtros de categorías que ya tienen productos.
+  const activeCategories = CATEGORIES.filter((item) => products.some((product) => product.category === item))
   const filtered = products.filter((product) => (category === 'Todos' || product.category === category) && `${product.name} ${product.description}`.toLowerCase().includes(query.toLowerCase()))
 
   return (
     <main className="public-shell catalog-page">
       <section className="catalog-intro">
-        <p className="eyebrow">CATÁLOGO</p>
         <div className="catalog-title-row">
-          <h1>Elige tu <em>favorita.</em></h1>
+          <h1>Catálogo</h1>
           <span className="catalog-total">{products.length} diseños</span>
         </div>
       </section>
@@ -37,13 +38,13 @@ export default function ProductosPage() {
         <label className="search-field"><Search size={16} strokeWidth={1.4} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por nombre o descripción" aria-label="Buscar productos" /></label>
         <div className="filter-chips">
           <button type="button" className={`filter-chip ${category === 'Todos' ? 'active' : ''}`} onClick={() => setCategory('Todos')}>Todos</button>
-          {CATEGORIES.map((item) => <button key={item} type="button" className={`filter-chip ${category === item ? 'active' : ''}`} onClick={() => setCategory(item)}>{item}</button>)}
+          {activeCategories.map((item) => <button key={item} type="button" className={`filter-chip ${category === item ? 'active' : ''}`} onClick={() => setCategory(item)}>{item}</button>)}
         </div>
       </section>
-      <p className="catalog-count">{filtered.length} {filtered.length === 1 ? 'producto' : 'productos'}</p>
+      {(query || category !== 'Todos') && <p className="catalog-count">{filtered.length} {filtered.length === 1 ? 'resultado' : 'resultados'}</p>}
       <div className="product-grid catalog-grid">
         {filtered.map((product) => <article className="product-card" key={product.id}>
-          <Link href={`/productos/${product.id}`} className="product-image-wrap"><img src={product.image} alt={product.name} className="product-image" />{isSoldOut(product) && <span className="stock-badge">Agotado</span>}</Link>
+          <Link href={`/productos/${product.id}`} className="product-image-wrap"><img src={product.image} alt={product.name} className="product-image" loading="lazy" decoding="async" />{isSoldOut(product) && <span className="stock-badge">Agotado</span>}</Link>
           <div className="product-meta"><span>{product.category}</span><span>{product.price === null ? 'Consultar' : money(finalPrice(product, settings) ?? 0)}</span></div>
           {totalPercent(product, settings) > 0 && <span className="product-sale">−{totalPercent(product, settings)}%</span>}
           <h3><Link href={`/productos/${product.id}`}>{product.name}</Link></h3>

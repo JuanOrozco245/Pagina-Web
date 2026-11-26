@@ -24,18 +24,17 @@ export default function Home() {
   const cursorRef = useRef<HTMLDivElement>(null)
   const ringRef = useRef<HTMLDivElement>(null)
 
+  // Cursor dorado personalizado: solo con mouse. La aparición de los elementos (.reveal)
+  // ahora es 100 % CSS, así que nunca depende de este efecto (antes, en celulares,
+  // este efecto terminaba antes de activarla y el inicio quedaba casi vacío).
   useEffect(() => {
-    if (window.matchMedia('(pointer: coarse)').matches) return
+    if (!window.matchMedia('(pointer: fine)').matches) return
     const move = (event: MouseEvent) => {
       if (cursorRef.current) cursorRef.current.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`
       if (ringRef.current) ringRef.current.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`
     }
     window.addEventListener('mousemove', move)
-    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
-      if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target) }
-    }), { threshold: 0.14 })
-    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el))
-    return () => { window.removeEventListener('mousemove', move); observer.disconnect() }
+    return () => window.removeEventListener('mousemove', move)
   }, [])
 
   const magnetic = (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
@@ -60,37 +59,42 @@ export default function Home() {
 
   // Los bestsellers son los primeros productos del catálogo. El orden se cambia en /admin.
   const featured = products.slice(0, 4)
-  const heroProduct = featured[0]
+  // Miniaturas para invitar al catálogo: los siguientes productos (o los primeros si hay pocos).
+  const teaser = (products.length > 8 ? products.slice(4, 9) : products.slice(0, 5))
 
   return (
     <main className="home-page">
       <div className="cursor-dot" ref={cursorRef} aria-hidden="true" />
       <div className={`cursor-ring ${cursorText ? 'cursor-ring-active' : ''}`} ref={ringRef} aria-hidden="true">{cursorText}</div>
 
-      <section className="hero home-hero">
-        <div className="hero-image" role="img" aria-label="Joyería dorada sobre una superficie oscura" style={{ backgroundImage: "url('/images/atelier-hero.png')" }} />
-        <div className="hero-shade" />
-        <div className="hero-content">
-          <p className="eyebrow reveal"><span className="eyebrow-line" />ZÉNIT JOYERÍA</p>
-          <h1 className="reveal">Detalles que<br /><em>brillan contigo.</em></h1>
-          <p className="hero-copy reveal">Topos y aretas doradas para regalar, combinar y hacer tuyos.</p>
-          <div className="hero-actions reveal">
+      <section className="hero2">
+        <div className="hero2-visual" role="img" aria-label="Anillo dorado con diamante" />
+        <div className="hero2-content">
+          <span className="hero2-eyebrow"><i aria-hidden="true" />Joyería en oro</span>
+          <h1>Detalles que <em>brillan contigo.</em></h1>
+          <div className="hero-actions">
             <Link href="/productos" className="hero-cta" onMouseMove={magnetic} onMouseLeave={resetMagnetic} onMouseEnter={() => setCursorText('Ver')}>Ver catálogo <FineArrow /></Link>
             <a href={whatsappLink('Hola, quiero conocer el catálogo de ZENIT Joyería', settings)} className="hero-wa" target="_blank" rel="noreferrer">WhatsApp <ArrowUpRight size={14} strokeWidth={1.4} /></a>
           </div>
         </div>
-        {heroProduct && (
-          <Link href={`/productos/${heroProduct.id}`} className="hero-product reveal" onMouseEnter={() => setCursorText('Ver')} onMouseLeave={() => setCursorText('')}>
-            <img src={heroProduct.image} alt={heroProduct.name} />
-            <span><small>Bestseller</small><strong>{heroProduct.name}</strong></span>
+        {featured[0] && (
+          <Link href={`/productos/${featured[0].id}`} className="hero2-card" aria-label={`Pieza destacada: ${featured[0].name}`}>
+            <img src={featured[0].image} alt="" width={64} height={64} />
+            <span className="hero2-card-text">
+              <small>Pieza destacada</small>
+              <strong>{featured[0].name}</strong>
+              <em>{featured[0].price === null ? 'Consultar precio' : money(finalPrice(featured[0], settings) ?? featured[0].price)}</em>
+            </span>
+            <ArrowUpRight size={16} strokeWidth={1.4} aria-hidden="true" />
           </Link>
         )}
+        <a href="#destacados" className="hero2-scroll" aria-label="Ver best sellers"><span>Best sellers</span><i aria-hidden="true" /></a>
       </section>
 
       <section className="collection section-pad" id="destacados">
-        <div className="collection-heading reveal">
-          <div><p className="eyebrow">BEST SELLERS</p><h2>Los más <em>pedidos.</em></h2></div>
-          <Link href="/productos" className="underlined-link" onMouseEnter={() => setCursorText('Ver todo')} onMouseLeave={() => setCursorText('')}>Ver catálogo completo <ArrowUpRight size={14} strokeWidth={1.4} /></Link>
+        <div className="collection-heading">
+          <h2>Best <em>sellers</em></h2>
+          <Link href="/productos" className="underlined-link" onMouseEnter={() => setCursorText('Ver todo')} onMouseLeave={() => setCursorText('')}>Ver todo <ArrowUpRight size={14} strokeWidth={1.4} /></Link>
         </div>
         <div className="product-grid featured-grid">
           {featured.map((product, index) => <article className="product-card reveal" key={product.id} onMouseMove={tilt} onMouseLeave={(event) => { event.currentTarget.style.setProperty('--rx', '0deg'); event.currentTarget.style.setProperty('--ry', '0deg'); setCursorText('') }} onMouseEnter={() => setCursorText('Ver')}>
@@ -103,17 +107,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="catalog-invite">
-        <div>
-          <p className="eyebrow">CATÁLOGO COMPLETO</p>
-          <h2>{products.length} diseños <em>para elegir.</em></h2>
-        </div>
-        <Link href="/productos" className="catalog-invite-cta" onMouseMove={magnetic} onMouseLeave={resetMagnetic}>Ir al catálogo <ArrowRight size={15} strokeWidth={1.4} /></Link>
-      </section>
+      <Link href="/productos" className="catalog-invite" onMouseEnter={() => setCursorText('Ver')} onMouseLeave={() => setCursorText('')}>
+        <span className="catalog-invite-thumbs" aria-hidden="true">
+          {teaser.map((product) => <img key={product.id} src={product.image} alt="" loading="lazy" />)}
+        </span>
+        <span className="catalog-invite-text"><strong>Ver los {products.length} diseños</strong><small>Todo el catálogo</small></span>
+        <span className="catalog-invite-cta">Ir al catálogo <ArrowRight size={16} strokeWidth={1.6} aria-hidden="true" /></span>
+      </Link>
 
       <section className="contact-section" id="contacto">
         <div className="contact-orbit" aria-hidden="true"><span /><span /><span /></div>
-        <div className="contact-content reveal"><p className="eyebrow">CONTACTO</p><h2>¿Buscas algo<br /><em>especial?</em></h2><p>Escríbenos para confirmar disponibilidad, resolver tus dudas y coordinar tu compra.</p><a href={whatsappLink('Hola, quiero conocer el catálogo de ZENIT Joyería', settings)} className="contact-cta" target="_blank" rel="noreferrer" onMouseMove={magnetic} onMouseLeave={resetMagnetic}>Preguntar por WhatsApp <ArrowUpRight size={15} strokeWidth={1.4} /></a></div>
+        <div className="contact-content reveal"><h2>¿Buscas algo <em>especial?</em></h2><a href={whatsappLink('Hola, quiero conocer el catálogo de ZENIT Joyería', settings)} className="contact-cta" target="_blank" rel="noreferrer" onMouseMove={magnetic} onMouseLeave={resetMagnetic}>Escríbenos por WhatsApp <ArrowUpRight size={15} strokeWidth={1.4} /></a></div>
       </section>
     </main>
   )

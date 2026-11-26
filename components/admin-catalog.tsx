@@ -30,6 +30,21 @@ export function AdminCatalog() {
   const [draft, setDraft] = useState<Product | null>(null)
   const [notice, setNotice] = useState('')
   const [saving, setSaving] = useState(false)
+  const [sale, setSale] = useState<{ whatsapp: string; globalDiscountPercent: number } | null>(null)
+  const saleDraft = sale ?? { whatsapp: settings.whatsapp, globalDiscountPercent: settings.globalDiscountPercent }
+  const saveSale = async (event: React.FormEvent) => {
+    event.preventDefault()
+    try {
+      const response = await fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...settings, ...saleDraft }) })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'No se pudo guardar.')
+      await mutateGlobal('/api/settings')
+      setSale(null)
+      setNotice('Descuento y WhatsApp guardados.')
+    } catch (saveError) {
+      setNotice(saveError instanceof Error ? saveError.message : 'No se pudo guardar.')
+    }
+  }
   const [uploading, setUploading] = useState(false)
   const filtered = useMemo(() => products.filter((product) => `${product.name} ${product.category}`.toLowerCase().includes(query.toLowerCase())), [products, query])
   const activeDiscounts = products.filter((product) => product.discountPercent > 0).length
@@ -121,7 +136,13 @@ export function AdminCatalog() {
       <section className="admin-content">
         <div className="admin-title-row"><div><p className="admin-eyebrow">PANEL DE CONTROL · SOLO EN ESTE EQUIPO</p><h1>Tu catálogo, <em>bajo control.</em></h1><p className="admin-lede">Agrega productos, actualiza precios, costos, descuentos y stock, o carga todo de una vez desde Excel.</p></div><div className="admin-head-actions"><Link href="/inventario" className="admin-secondary">Carga masiva</Link><button className="admin-primary" onClick={() => setDraft(emptyProduct())}><Plus size={15} /> Nuevo producto</button></div></div>
         <div className="admin-stats"><article><span>Productos</span><strong>{products.length}</strong><small>En tu catálogo local</small></article><article><span>Con descuento</span><strong>{activeDiscounts}</strong><small>Promociones activas</small></article><article><span>Valor de venta</span><strong>{money(inventoryValue)}</strong><small>Suma de precios finales</small></article><article><span>Utilidad potencial</span><strong className="finance-value">{money(potentialProfit)}</strong><small>Con los costos cargados</small></article></div>
-        <div className="admin-toolbar"><div><h2>Productos</h2><p>Usa las flechas para cambiar el orden. Los primeros 4 aparecen como bestsellers en el inicio.</p></div><label className="admin-search"><Search size={15} /><span className="sr-only">Buscar productos</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por nombre o categoría" /></label></div>
+        <form className="admin-sale-strip" onSubmit={saveSale}>
+          <label>Descuento general (%)<input type="number" min="0" max="90" step="1" value={saleDraft.globalDiscountPercent} onChange={(event) => setSale({ ...saleDraft, globalDiscountPercent: Number(event.target.value) })} /></label>
+          <label>WhatsApp de ventas<input value={saleDraft.whatsapp} onChange={(event) => setSale({ ...saleDraft, whatsapp: event.target.value.replace(/[^\d]/g, '') })} placeholder="3001234567" maxLength={15} inputMode="numeric" /></label>
+          <button type="submit" className="admin-secondary" disabled={!sale}>Guardar</button>
+          <small>El descuento general se suma al de cada producto. El de cada producto se edita en su ficha.</small>
+        </form>
+        <div className="admin-toolbar"><div><h2>Productos</h2><p>Usa las flechas para ordenar; los primeros se muestran en el inicio.</p></div><label className="admin-search"><Search size={15} /><span className="sr-only">Buscar productos</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por nombre o categoría" /></label></div>
         {notice && <p className="admin-notice" role="status">{notice}</p>}
         {error && <p className="admin-notice" role="status">La tienda remota no guarda cambios locales. Abre el proyecto desde localhost para editar y guardar.</p>}
         <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Producto</th><th>Precio</th><th>Descuento</th><th>Precio final</th><th>Costo</th><th>Utilidad</th><th>Margen</th><th>Stock</th><th>Orden</th><th><span className="sr-only">Acciones</span></th></tr></thead><tbody>{filtered.map((product) => <tr key={product.id}>
