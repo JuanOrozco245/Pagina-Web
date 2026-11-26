@@ -49,9 +49,37 @@ export function hasUsers() {
   return readUsers().length > 0
 }
 
+/**
+ * Cuenta inicial para probar el panel cuando todavía no existe ninguna.
+ * Solo se crea si el archivo de usuarios está vacío; luego puede cambiarse
+ * la contraseña desde /usuarios.
+ */
+export async function ensureDefaultAdmin() {
+  if (hasUsers()) return
+  const user: UserRecord = {
+    usuario: 'admin',
+    nombre: 'Administrador',
+    rol: 'dueno',
+    hash: await hashPassword('Admin'),
+    creado: new Date().toISOString(),
+    activo: true,
+  }
+  writeUsers([user])
+}
+
 export function findUser(usuario: string) {
   const wanted = usuario.trim().toLowerCase()
   return readUsers().find((user) => user.usuario === wanted) ?? null
+}
+
+/**
+ * Indica si la cuenta de prueba `admin` sigue usando la contraseña inicial.
+ * El login muestra la pista solo mientras eso sea cierto; al cambiarla desaparece.
+ */
+export async function defaultAdminIsActive() {
+  const user = findUser('admin')
+  if (!user || !user.activo) return false
+  return verifyPassword('Admin', user.hash)
 }
 
 export function toPublicUser(user: UserRecord): PublicUser {

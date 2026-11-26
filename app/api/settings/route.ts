@@ -23,9 +23,20 @@ function isLocalRequest(request: Request) {
   }
 }
 
+/** Solo se conservan los datos de venta; los ajustes viejos de la web se descartan. */
+function normalizeSettings(value: unknown): Settings {
+  const v = (value && typeof value === 'object' ? value : {}) as Partial<Settings>
+  const whatsapp = typeof v.whatsapp === 'string' ? v.whatsapp.replace(/[^\d]/g, '').slice(0, 15) : ''
+  const discount = Number(v.globalDiscountPercent)
+  return {
+    whatsapp,
+    globalDiscountPercent: Number.isInteger(discount) && discount >= 0 && discount <= 90 ? discount : 0,
+  }
+}
+
 async function readSettings(): Promise<Settings> {
   try {
-    return { ...initialSettings, ...JSON.parse(await fs.readFile(settingsPath, 'utf8')) } as Settings
+    return normalizeSettings(JSON.parse(await fs.readFile(settingsPath, 'utf8')))
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
     await fs.mkdir(path.dirname(settingsPath), { recursive: true })
@@ -37,17 +48,8 @@ async function readSettings(): Promise<Settings> {
 function validSettings(value: unknown): value is Settings {
   if (!value || typeof value !== 'object') return false
   const v = value as Partial<Settings>
-  const validImage = typeof v.heroImage === 'string' && (
-    /^\/[a-zA-Z0-9_./-]+$/.test(v.heroImage) ||
-    /^https:\/\/[a-zA-Z0-9.-]+(?::\d+)?(?:\/[^\s]*)?$/.test(v.heroImage)
-  )
   return typeof v.whatsapp === 'string' && /^\d{0,15}$/.test(v.whatsapp)
-    && typeof v.heroTitleTop === 'string' && v.heroTitleTop.length <= 60
-    && typeof v.heroTitleAccent === 'string' && v.heroTitleAccent.length <= 60
-    && typeof v.heroCopy === 'string' && v.heroCopy.length <= 300
-    && validImage
     && typeof v.globalDiscountPercent === 'number' && Number.isInteger(v.globalDiscountPercent) && v.globalDiscountPercent >= 0 && v.globalDiscountPercent <= 90
-    && Array.isArray(v.featuredIds) && v.featuredIds.length <= 4 && v.featuredIds.every((id) => typeof id === 'string' && /^[a-z0-9-]{1,80}$/.test(id))
 }
 
 export async function GET(request: Request) {
@@ -65,13 +67,14 @@ export async function PUT(request: Request) {
   if (!user) return NextResponse.json({ error: 'Debes iniciar sesión en el panel para cambiar la configuración.' }, { status: 401 })
   try {
     const value: unknown = await request.json()
-    if (!validSettings(value)) return NextResponse.json({ error: 'Revisa los datos de configuración.' }, { status: 400 })
+    if (!validSettings(value)) return NextResponse.json({ error: 'Revisa los datos de venta.' }, { status: 400 })
     const previous = await readSettings()
+    const next = normalizeSettings(value)
     await fs.mkdir(path.dirname(settingsPath), { recursive: true })
     const temporaryPath = `${settingsPath}.${randomUUID()}.tmp`
-    await fs.writeFile(temporaryPath, JSON.stringify(value, null, 2), 'utf8')
+    await fs.writeFile(temporaryPath, JSON.stringify(next, null, 2), 'utf8')
     await fs.rename(temporaryPath, settingsPath)
-    registrarAjustes(user, previous, value)
+    registrarAjustes(user, previous, next)
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ error: 'No se pudo guardar la configuración.' }, { status: 500 })

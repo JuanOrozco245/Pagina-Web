@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ArrowUpRight, Camera, Gem, MessageCircle } from 'lucide-react'
+import { ArrowUpRight, Camera, MessageCircle } from 'lucide-react'
+import { Wordmark } from '@/components/wordmark'
 import { useCart } from '@/components/cart-provider'
 import { isAdminPath } from '@/lib/admin-routes'
 import { whatsappLink } from '@/lib/settings'
@@ -10,8 +11,6 @@ import { whatsappLink } from '@/lib/settings'
 const explore = [
   { label: 'Inicio', href: '/' },
   { label: 'Catálogo', href: '/productos' },
-  { label: 'Best Sellers', href: '/#destacados' },
-  { label: 'Nuestra historia', href: '/#historia' },
   { label: 'Preguntas frecuentes', href: '/preguntas-frecuentes' },
 ]
 
@@ -33,10 +32,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <Link href="/" className="footer-wordmark" aria-label="ZENIT Joyería, inicio">
-            <span className="wordmark-mark" aria-hidden="true"><Gem size={18} strokeWidth={1.15} /><span className="wordmark-spark">✦</span></span>
-            <span><span className="wordmark-name">ZÉNIT</span><small>JOYERÍA</small></span>
-          </Link>
+          <Wordmark className="footer-wordmark" />
           <p>Detalles dorados para brillar a tu manera.</p>
           <p className="footer-brand-note">Una selección pensada para regalar, combinar y hacer tuya.</p>
         </div>

@@ -101,3 +101,43 @@ Aquí anotamos cada modificación del proyecto con su fecha. Para agregar una en
 - Completar correo, dirección, horarios, redes sociales y créditos de diseño/desarrollo en el footer.
 - Agregar productos reales a Anillos, Cadenas y Manillas: hoy no existen piezas de esas categorías en el catálogo y se muestran como “Próximamente”.
 - La generación de una imagen nueva falló por credenciales del servicio de imágenes; la sección de historia usa imágenes existentes de `public/images`. Reemplazar por una fotografía editorial propia cuando esté disponible.
+
+---
+
+## 2026-11-25
+
+**Inicio y catálogo centrados en producto**
+
+- El inicio ahora abre con un bloque compacto (440 px) y un producto destacado; se eliminó el espacio vacío que había antes del contenido.
+- Se quitaron los textos largos del inicio: queda un título corto, una línea de apoyo y dos acciones (catálogo y WhatsApp).
+- La sección “Nuestra historia” se eliminó por completo del inicio y del pie de página.
+- Los bestsellers del inicio son los **primeros 4 productos del catálogo**, en el orden que se define desde `/admin`. Ya no se eligen desde configuración.
+- Se añadió una franja grande “Ir al catálogo” después de los bestsellers para empujar la venta hacia el catálogo completo.
+- El catálogo ahora muestra los productos casi de inmediato: se quitaron las tarjetas gigantes de categoría, el encabezado es compacto y los filtros son una barra pequeña con buscador y chips.
+- El catálogo usa 4 columnas en escritorio, 2 en tablet/móvil y 1 en pantallas muy pequeñas; las imágenes son cuadradas y las tarjetas muestran solo categoría, precio, nombre y acción.
+
+**Cabecera, logo y bolsa**
+
+- Se eliminó “Best Sellers” del menú superior; ahora solo quedan Inicio, Catálogo y Contacto.
+- “Catálogo” se destaca como botón dorado en la cabecera.
+- Se eliminó el botón de bolsa de la cabecera. La selección solo aparece como botón flotante cuando ya tiene productos, y el panel lateral pasó a llamarse “Tu selección”.
+- Se creó `components/wordmark.tsx` y se usa el mismo logo, tamaño y tipografía en cabecera, pie, login y panel.
+
+**Panel y acceso**
+
+- El acceso quedó simplificado: solo usuario y contraseña. Se eliminó la pantalla de creación de cuenta.
+- Cuenta de prueba local: **admin / Admin** (se puede cambiar desde `/usuarios`). La pista en el login se muestra solo mientras esa contraseña inicial siga activa.
+- Si el archivo de usuarios está vacío, el sistema crea automáticamente esa cuenta inicial.
+- La página de configuración se redujo a **Ventas**: solo número de WhatsApp y descuento general. Se eliminaron los campos de título, texto, imagen y selección de bestsellers.
+- El menú del panel ahora dice “Ventas” en lugar de “Configuración”.
+
+**Verificación**
+
+- `tsc --noEmit` y `next build` correctos.
+- Prueba HTTP: login con `admin / Admin` devuelve sesión válida; `/admin` y `/configuracion` responden 200 con sesión y redirigen a `/login` sin sesión.
+- `GET/PUT /api/settings` funcionan solo con los campos de venta.
+
+**Pendiente**
+
+- Cambiar la contraseña de prueba `Admin` por una propia antes de publicar la tienda.
+- Completar los textos legales y los datos de contacto/redes del pie de página.

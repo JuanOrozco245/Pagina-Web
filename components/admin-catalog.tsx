@@ -5,6 +5,7 @@ import useSWR, { useSWRConfig } from 'swr'
 import Link from 'next/link'
 import { ArrowDown, ArrowLeft, ArrowUp, ArrowUpRight, ImagePlus, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { AdminNav } from '@/components/admin-nav'
+import { Wordmark } from '@/components/wordmark'
 import { CATEGORIES, discountedPrice, initialProducts, type Product } from '@/lib/catalog'
 import { finalPrice, initialSettings, margin, profit, type Settings } from '@/lib/settings'
 
@@ -116,11 +117,11 @@ export function AdminCatalog() {
   return (
     <main className="admin-shell">
       <AdminNav />
-      <header className="admin-header"><Link className="admin-brand" href="/"><span className="admin-brand-mark">Z</span><span>ZENIT <small>GESTIÓN LOCAL</small></span></Link><Link href="/" className="admin-back"><ArrowLeft size={14} /> Volver a la tienda</Link></header>
+      <header className="admin-header"><Wordmark /><Link href="/" className="admin-back"><ArrowLeft size={14} /> Volver a la tienda</Link></header>
       <section className="admin-content">
         <div className="admin-title-row"><div><p className="admin-eyebrow">PANEL DE CONTROL · SOLO EN ESTE EQUIPO</p><h1>Tu catálogo, <em>bajo control.</em></h1><p className="admin-lede">Agrega productos, actualiza precios, costos, descuentos y stock, o carga todo de una vez desde Excel.</p></div><div className="admin-head-actions"><Link href="/inventario" className="admin-secondary">Carga masiva</Link><button className="admin-primary" onClick={() => setDraft(emptyProduct())}><Plus size={15} /> Nuevo producto</button></div></div>
         <div className="admin-stats"><article><span>Productos</span><strong>{products.length}</strong><small>En tu catálogo local</small></article><article><span>Con descuento</span><strong>{activeDiscounts}</strong><small>Promociones activas</small></article><article><span>Valor de venta</span><strong>{money(inventoryValue)}</strong><small>Suma de precios finales</small></article><article><span>Utilidad potencial</span><strong className="finance-value">{money(potentialProfit)}</strong><small>Con los costos cargados</small></article></div>
-        <div className="admin-toolbar"><div><h2>Productos</h2><p>Usa las flechas para cambiar el orden. El lápiz edita y la basura elimina.</p></div><label className="admin-search"><Search size={15} /><span className="sr-only">Buscar productos</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por nombre o categoría" /></label></div>
+        <div className="admin-toolbar"><div><h2>Productos</h2><p>Usa las flechas para cambiar el orden. Los primeros 4 aparecen como bestsellers en el inicio.</p></div><label className="admin-search"><Search size={15} /><span className="sr-only">Buscar productos</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por nombre o categoría" /></label></div>
         {notice && <p className="admin-notice" role="status">{notice}</p>}
         {error && <p className="admin-notice" role="status">La tienda remota no guarda cambios locales. Abre el proyecto desde localhost para editar y guardar.</p>}
         <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Producto</th><th>Precio</th><th>Descuento</th><th>Precio final</th><th>Costo</th><th>Utilidad</th><th>Margen</th><th>Stock</th><th>Orden</th><th><span className="sr-only">Acciones</span></th></tr></thead><tbody>{filtered.map((product) => <tr key={product.id}>

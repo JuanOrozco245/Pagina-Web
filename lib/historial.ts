@@ -174,12 +174,7 @@ export function registrarCatalogo(actor: Actor, antes: Product[], despues: Produ
 
 const CAMPOS_AJUSTES: [keyof Settings, string][] = [
   ['whatsapp', 'WhatsApp'],
-  ['heroTitleTop', 'Título del inicio (línea 1)'],
-  ['heroTitleAccent', 'Título del inicio (en dorado)'],
-  ['heroCopy', 'Texto del inicio'],
-  ['heroImage', 'Imagen del inicio'],
   ['globalDiscountPercent', 'Descuento general'],
-  ['featuredIds', 'Productos Bestsellers'],
 ]
 
 export function registrarAjustes(actor: Actor, antes: Settings, despues: Settings) {
@@ -189,10 +184,9 @@ export function registrarAjustes(actor: Actor, antes: Settings, despues: Setting
     const d = despues[campo]
     if (JSON.stringify(a ?? null) === JSON.stringify(d ?? null)) continue
     if (campo === 'globalDiscountPercent') cambios.push({ campo: etiqueta, antes: `${a ?? 0}%`, despues: `${d ?? 0}%` })
-    else if (campo === 'featuredIds') cambios.push({ campo: etiqueta, antes: (a as string[]).join(', ') || '—', despues: (d as string[]).join(', ') || '—' })
     else cambios.push({ campo: etiqueta, antes: texto(a), despues: texto(d) })
   }
-  if (cambios.length) registrar(actor, { tipo: 'ajustes', accion: 'modificó', resumen: 'Cambió la configuración de la tienda.', cambios })
+  if (cambios.length) registrar(actor, { tipo: 'ajustes', accion: 'modificó', resumen: 'Cambió los datos de venta.', cambios })
 }
 
 type PedidoMin = { id: string; nombre: string; estado: string; subtotal: number }

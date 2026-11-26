@@ -1,21 +1,11 @@
 export type Settings = {
   whatsapp: string
-  heroTitleTop: string
-  heroTitleAccent: string
-  heroCopy: string
-  heroImage: string
   globalDiscountPercent: number
-  featuredIds: string[]
 }
 
 export const initialSettings: Settings = {
   whatsapp: '',
-  heroTitleTop: 'Un detalle que',
-  heroTitleAccent: 'brilla contigo.',
-  heroCopy: 'Descubre nuestros topitos y aretas doradas: pequeños detalles para regalar, combinar y hacer tuyos.',
-  heroImage: '/images/atelier-hero.png',
   globalDiscountPercent: 0,
-  featuredIds: ['corazon-mini', 'bolsita-suerte', 'clover-rayado', 'corazon-radial'],
 }
 
 export function finalPrice(product: { price: number | null; discountPercent: number }, settings: Settings) {

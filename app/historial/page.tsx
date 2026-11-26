@@ -21,7 +21,7 @@ type PublicUser = { usuario: string; nombre: string }
 
 const TIPOS: Record<string, string> = {
   producto: 'Productos',
-  ajustes: 'Configuración',
+  ajustes: 'Ventas',
   pedido: 'Pedidos',
   imagen: 'Imágenes',
   usuario: 'Usuarios',

@@ -20,14 +20,14 @@ export function AdminNav() {
 
   const links = [
     { href: '/admin', label: 'Panel' },
-    { href: '/inventario', label: 'Inventario' },
     { href: '/pedidos', label: 'Pedidos' },
     { href: '/clientes', label: 'Clientes' },
+    { href: '/inventario', label: 'Inventario' },
     { href: '/reportes', label: 'Reportes' },
-    { href: '/configuracion', label: 'Configuración' },
-    { href: '/respaldo', label: 'Respaldo' },
-    ...(isOwner ? [{ href: '/historial', label: 'Historial' }] : []),
+    { href: '/configuracion', label: 'Ventas' },
     { href: '/usuarios', label: isOwner ? 'Usuarios' : 'Mi cuenta' },
+    ...(isOwner ? [{ href: '/historial', label: 'Historial' }] : []),
+    { href: '/respaldo', label: 'Respaldo' },
     { href: '/productos', label: 'Ver tienda' },
   ]
 

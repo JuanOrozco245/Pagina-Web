@@ -10,7 +10,7 @@ import {
   sessionCookieOptions,
 } from '@/lib/auth'
 import { registrar } from '@/lib/historial'
-import { checkCredentials, hasUsers, normalizeUsername } from '@/lib/users'
+import { checkCredentials, ensureDefaultAdmin, normalizeUsername } from '@/lib/users'
 
 export const runtime = 'nodejs'
 
@@ -18,9 +18,9 @@ export async function POST(request: Request) {
   if (!isSameOrigin(request)) {
     return NextResponse.json({ error: 'Solicitud no válida.' }, { status: 403 })
   }
-  if (!hasUsers()) {
-    return NextResponse.json({ error: 'Todavía no hay cuentas. Crea la cuenta del dueño desde la pantalla de acceso.' }, { status: 409 })
-  }
+  // En una instalación nueva, la primera cuenta es admin / Admin para poder
+  // entrar sin pantallas de configuración. Se cambia luego desde /usuarios.
+  await ensureDefaultAdmin()
 
   const body = (await request.json().catch(() => null)) as { usuario?: unknown; password?: unknown } | null
   const usuario = normalizeUsername(body?.usuario).slice(0, 30)

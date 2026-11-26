@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = { title: 'Preguntas frecuentes · ZENIT Joyería' }
 
 const faqs = [
-  { q: '¿Cómo hago un pedido?', a: 'Elige la pieza que te guste, agrégala a la bolsa y envía la solicitud con tu nombre. También puedes escribirnos directamente por WhatsApp para coordinar tu compra.' },
+  { q: '¿Cómo hago un pedido?', a: 'Elige la pieza que te guste, agrégala a tu selección y envía la solicitud con tu nombre. También puedes escribirnos directamente por WhatsApp para coordinar tu compra.' },
   { q: '¿Hacen envíos?', a: 'Sí. Los detalles de entrega se coordinan personalmente por WhatsApp según tu ciudad.' },
   { q: '¿Los productos son dorados?', a: 'Nuestra colección está compuesta por topitos y aretas en acabado dorado. Si necesitas detalles de materiales o cuidados, consúltanos antes de comprar.' },
   { q: '¿Cómo cuido mis joyas?', a: 'Guárdalas en un lugar seco, evita el contacto con perfumes o cremas y límpialas con un paño suave. Así conservan su brillo por más tiempo.' },

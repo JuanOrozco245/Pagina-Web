@@ -3,7 +3,7 @@
 import useSWR from 'swr'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, ArrowUpRight, Plus, ShoppingBag } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, Plus } from 'lucide-react'
 import { initialProducts, isSoldOut, type Product } from '@/lib/catalog'
 import { finalPrice, totalPercent, whatsappLink } from '@/lib/settings'
 import { useCart } from '@/components/cart-provider'
@@ -18,7 +18,7 @@ const money = (amount: number) => new Intl.NumberFormat('es-CO', { style: 'curre
 export default function ProductoDetallePage() {
   const params = useParams<{ id: string }>()
   const { data: products = initialProducts } = useSWR('/api/catalog', fetcher, { fallbackData: initialProducts, revalidateOnFocus: true })
-  const { settings, addToCart, openCart } = useCart()
+  const { settings, addToCart } = useCart()
   const product = products.find((item) => item.id === params.id)
 
   if (!product) return <main className="public-shell"><section className="catalog-intro"><h1>Producto no encontrado</h1><Link href="/productos" className="underlined-link"><ArrowLeft size={14} /> Volver al catálogo</Link></section></main>
@@ -38,8 +38,7 @@ export default function ProductoDetallePage() {
             <div className="detail-price">{product.price === null ? <span>Consultar precio</span> : <><strong>{money(finalPrice(product, settings) ?? 0)}</strong>{totalPercent(product, settings) > 0 && <><del>{money(product.price)}</del><span className="detail-discount">−{totalPercent(product, settings)}%</span></>}</>}</div>
             <p className="detail-stock">{product.stock === null || product.stock === undefined ? 'Disponible bajo pedido' : product.stock > 0 ? `${product.stock} unidades disponibles` : 'Agotado por ahora'}</p>
             <div className="detail-actions">
-              {product.price !== null && !isSoldOut(product) && <button className="detail-add" onClick={() => addToCart(product)}><Plus size={16} /> Añadir a la bolsa</button>}
-              <button className="detail-secondary" onClick={openCart}><ShoppingBag size={16} /> Ver mi bolsa</button>
+              {product.price !== null && !isSoldOut(product) && <button className="detail-add" onClick={() => addToCart(product)}><Plus size={16} /> Añadir</button>}
               <a className="detail-whatsapp" href={whatsappLink(`Hola, quiero consultar disponibilidad de ${product.name}.`, settings)} target="_blank" rel="noreferrer">Consultar por WhatsApp <ArrowUpRight size={14} /></a>
             </div>
             <p className="detail-note">Los detalles de entrega se coordinan personalmente. Precios en pesos colombianos.</p>
