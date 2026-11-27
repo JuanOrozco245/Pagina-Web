@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import Link from 'next/link'
 import { ArrowUpRight, Search } from 'lucide-react'
@@ -20,6 +20,11 @@ export default function ProductosPage() {
   const { settings, addToCart } = useCart()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Todos')
+  // Permite llegar con una categoría ya elegida desde el inicio (/productos?categoria=Topos).
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get('categoria')
+    if (wanted && (CATEGORIES as readonly string[]).includes(wanted)) setCategory(wanted)
+  }, [])
 
   // Solo se ofrecen los filtros de categorías que ya tienen productos.
   const activeCategories = CATEGORIES.filter((item) => products.some((product) => product.category === item))

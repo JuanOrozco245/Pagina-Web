@@ -59,6 +59,9 @@ export default function Home() {
 
   // Los bestsellers son los primeros productos del catálogo. El orden se cambia en /admin.
   const featured = products.slice(0, 4)
+  const unique = products.filter((product, index, all) => all.findIndex((other) => other.image === product.image) === index)
+  const [tileFeature, tilePhoto, tileWa] = [unique[0] ?? products[0], unique[1] ?? products[1] ?? products[0], unique[2] ?? products[2] ?? products[0]]
+  const heroCategories = Array.from(new Set(products.map((product) => product.category))).slice(0, 4)
   // Miniaturas para invitar al catálogo: los siguientes productos (o los primeros si hay pocos).
   const teaser = (products.length > 8 ? products.slice(4, 9) : products.slice(0, 5))
 
@@ -67,29 +70,53 @@ export default function Home() {
       <div className="cursor-dot" ref={cursorRef} aria-hidden="true" />
       <div className={`cursor-ring ${cursorText ? 'cursor-ring-active' : ''}`} ref={ringRef} aria-hidden="true">{cursorText}</div>
 
+      <div className="bento">
       <section className="hero2">
+        <div className="hero2-orbit" aria-hidden="true" />
         <div className="hero2-visual" role="img" aria-label="Anillo dorado con diamante" />
+        <i className="hero2-spark s1" aria-hidden="true" /><i className="hero2-spark s2" aria-hidden="true" /><i className="hero2-spark s3" aria-hidden="true" />
         <div className="hero2-content">
-          <span className="hero2-eyebrow"><i aria-hidden="true" />Joyería en oro</span>
+          <span className="hero2-eyebrow"><i aria-hidden="true" />Venta de joyería en oro</span>
           <h1>Detalles que <em>brillan contigo.</em></h1>
+          <p className="hero2-lede">Joyas en oro para regalar, para celebrar y para ti.</p>
           <div className="hero-actions">
             <Link href="/productos" className="hero-cta" onMouseMove={magnetic} onMouseLeave={resetMagnetic} onMouseEnter={() => setCursorText('Ver')}>Ver catálogo <FineArrow /></Link>
             <a href={whatsappLink('Hola, quiero conocer el catálogo de ZENIT Joyería', settings)} className="hero-wa" target="_blank" rel="noreferrer">WhatsApp <ArrowUpRight size={14} strokeWidth={1.4} /></a>
           </div>
         </div>
-        {featured[0] && (
-          <Link href={`/productos/${featured[0].id}`} className="hero2-card" aria-label={`Pieza destacada: ${featured[0].name}`}>
-            <img src={featured[0].image} alt="" width={64} height={64} />
-            <span className="hero2-card-text">
-              <small>Pieza destacada</small>
-              <strong>{featured[0].name}</strong>
-              <em>{featured[0].price === null ? 'Consultar precio' : money(finalPrice(featured[0], settings) ?? featured[0].price)}</em>
-            </span>
-            <ArrowUpRight size={16} strokeWidth={1.4} aria-hidden="true" />
-          </Link>
-        )}
-        <a href="#destacados" className="hero2-scroll" aria-label="Ver best sellers"><span>Best sellers</span><i aria-hidden="true" /></a>
       </section>
+      {tileFeature && (
+        <Link href={`/productos/${tileFeature.id}`} className="bento-tile bento-feature" onMouseEnter={() => setCursorText('Ver')} onMouseLeave={() => setCursorText('')}>
+          <img src={tileFeature.image} alt="" className="bento-feature-img" />
+          <span className="bento-label">Pieza destacada</span>
+          <h3>{tileFeature.name}</h3>
+          <p>{tileFeature.description}</p>
+          <span className="bento-link">Ver pieza <ArrowRight size={14} strokeWidth={1.5} aria-hidden="true" /></span>
+        </Link>
+      )}
+
+      <Link href="/productos" className="bento-tile bento-catalog" onMouseEnter={() => setCursorText('Ver')} onMouseLeave={() => setCursorText('')}>
+        <span className="bento-thumbs" aria-hidden="true">{unique.slice(0, 4).map((product) => <img key={product.id} src={product.image} alt="" />)}</span>
+        <h3>Todo el catálogo</h3>
+        <p>{products.length} diseños en oro, listos para regalar.</p>
+        <span className="bento-link">Ver catálogo <ArrowRight size={14} strokeWidth={1.5} aria-hidden="true" /></span>
+      </Link>
+
+      {tilePhoto && (
+        <Link href={`/productos/${tilePhoto.id}`} className="bento-tile bento-photo" onMouseEnter={() => setCursorText('Ver')} onMouseLeave={() => setCursorText('')}>
+          <img src={tilePhoto.image} alt={tilePhoto.name} />
+          <span className="bento-badge">{tilePhoto.category}</span>
+          <span className="bento-photo-text"><strong>{tilePhoto.name}</strong><small>{tilePhoto.price === null ? 'Consultar' : money(finalPrice(tilePhoto, settings) ?? tilePhoto.price)}</small></span>
+        </Link>
+      )}
+
+      <a href={whatsappLink('Hola, quiero conocer el catálogo de ZENIT Joyería', settings)} className="bento-tile bento-wa" target="_blank" rel="noreferrer">
+        {tileWa && <img src={tileWa.image} alt="" />}
+        <span className="bento-label">Atención directa</span>
+        <h3>¿Buscas algo <em>especial?</em></h3>
+        <span className="bento-link">Escríbenos por WhatsApp <ArrowUpRight size={14} strokeWidth={1.5} aria-hidden="true" /></span>
+      </a>
+      </div>
 
       <section className="collection section-pad" id="destacados">
         <div className="collection-heading">
@@ -106,14 +133,6 @@ export default function Home() {
           </article>)}
         </div>
       </section>
-
-      <Link href="/productos" className="catalog-invite" onMouseEnter={() => setCursorText('Ver')} onMouseLeave={() => setCursorText('')}>
-        <span className="catalog-invite-thumbs" aria-hidden="true">
-          {teaser.map((product) => <img key={product.id} src={product.image} alt="" loading="lazy" />)}
-        </span>
-        <span className="catalog-invite-text"><strong>Ver los {products.length} diseños</strong><small>Todo el catálogo</small></span>
-        <span className="catalog-invite-cta">Ir al catálogo <ArrowRight size={16} strokeWidth={1.6} aria-hidden="true" /></span>
-      </Link>
 
       <section className="contact-section" id="contacto">
         <div className="contact-orbit" aria-hidden="true"><span /><span /><span /></div>
