@@ -915,3 +915,12 @@ body { background-image:radial-gradient(ellipse 70% 40% at 100% 0,rgba(150,108,4
 .bento .hero2-lede { max-width:330px; }
 @media (max-width:900px) { .bento-feature-img { width:56%;height:100%;right:0;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40%);mask-image:linear-gradient(90deg,transparent 0,#000 40%); } }
 .bento .hero2-lede{max-width:none;text-wrap:balance}
+
+/* ===== v14: polvo dorado, video en la baldosa central y entrada suave ===== */
+.gold-dust { position:fixed;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none; }
+.bento-photo .bento-video { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .8s;animation:zenit-drift 22s ease-in-out infinite alternate; }
+.bento-photo:hover .bento-video { transform:scale(1.05); }
+@keyframes zenit-drift { from{scale:1;translate:0 0} to{scale:1.09;translate:-1.5% -1%} }
+.bento .hero2,.bento-tile { animation:zenit-rise .9s cubic-bezier(.2,.7,.2,1) both; }
+.bento-feature { animation-delay:.12s; } .bento-catalog { animation-delay:.22s; } .bento-photo { animation-delay:.32s; } .bento-wa { animation-delay:.42s; }
+@media (prefers-reduced-motion:reduce) { .bento .hero2,.bento-tile,.bento-photo .bento-video { animation:none; } .gold-dust { display:none; } }

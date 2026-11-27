@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { CartProvider } from '@/components/cart-provider'
+import { GoldDust } from '@/components/gold-dust'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 import './globals.css'
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="es">
       <body className="antialiased">
         <CartProvider>
+          <GoldDust />
           <SiteHeader />
           {children}
           <SiteFooter />

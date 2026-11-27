@@ -104,7 +104,8 @@ export default function Home() {
 
       {tilePhoto && (
         <Link href={`/productos/${tilePhoto.id}`} className="bento-tile bento-photo" onMouseEnter={() => setCursorText('Ver')} onMouseLeave={() => setCursorText('')}>
-          <img src={tilePhoto.image} alt={tilePhoto.name} />
+          {/* Para usar un video propio: guárdalo como public/videos/joyas.mp4. Mientras no exista, se ve la foto. */}
+          <video className="bento-video" poster={tilePhoto.image} autoPlay muted loop playsInline preload="metadata" aria-label={tilePhoto.name}><source src="/videos/joyas.mp4" type="video/mp4" /></video>
           <span className="bento-badge">{tilePhoto.category}</span>
           <span className="bento-photo-text"><strong>{tilePhoto.name}</strong><small>{tilePhoto.price === null ? 'Consultar' : money(finalPrice(tilePhoto, settings) ?? tilePhoto.price)}</small></span>
         </Link>
@@ -119,7 +120,7 @@ export default function Home() {
       </div>
 
       <section className="collection section-pad" id="destacados">
-        <div className="collection-heading">
+        <div className="collection-heading reveal">
           <h2>Best <em>sellers</em></h2>
           <Link href="/productos" className="underlined-link" onMouseEnter={() => setCursorText('Ver todo')} onMouseLeave={() => setCursorText('')}>Ver todo <ArrowUpRight size={14} strokeWidth={1.4} /></Link>
         </div>
