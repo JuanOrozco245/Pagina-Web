@@ -1,11 +1,13 @@
 export type Settings = {
   whatsapp: string
   globalDiscountPercent: number
+  featuredProductId?: string | null
 }
 
 export const initialSettings: Settings = {
   whatsapp: '',
   globalDiscountPercent: 0,
+  featuredProductId: null,
 }
 
 export function finalPrice(product: { price: number | null; discountPercent: number }, settings: Settings) {

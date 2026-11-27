@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import useSWR from 'swr'
 import Link from 'next/link'
-import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Pause, Play } from 'lucide-react'
 import { initialProducts, isSoldOut, type Product } from '@/lib/catalog'
-import { finalPrice, totalPercent, whatsappLink } from '@/lib/settings'
+import { finalPrice, totalPercent, whatsappLink, type Settings } from '@/lib/settings'
 import { useCart } from '@/components/cart-provider'
 
 const fetchCatalog = async (url: string): Promise<Product[]> => {
@@ -16,6 +16,59 @@ const fetchCatalog = async (url: string): Promise<Product[]> => {
 const money = (amount: number) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount)
 
 function FineArrow() { return <ArrowRight aria-hidden="true" size={16} strokeWidth={1.4} /> }
+
+function CatalogPhotos({ photos, settings, onCursor }: { photos: Product[]; settings: Settings; onCursor: (text: string) => void }) {
+  const [activeImage, setActiveImage] = useState<string>()
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set())
+  const [paused, setPaused] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(true)
+  const [hovered, setHovered] = useState(false)
+  const [focused, setFocused] = useState(false)
+  const available = photos.filter((product) => !failedImages.has(product.image))
+  const index = Math.max(0, available.findIndex((product) => product.image === activeImage))
+  const photo = available[index]
+  const nextImage = available.length > 1 ? available[(index + 1) % available.length].image : undefined
+  const autoplay = !paused && !reducedMotion && !hovered && !focused
+
+  useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setReducedMotion(preference.matches)
+    update()
+    preference.addEventListener('change', update)
+    return () => preference.removeEventListener('change', update)
+  }, [])
+
+  useEffect(() => {
+    if (!autoplay || !nextImage) return
+    const timer = window.setTimeout(() => setActiveImage(nextImage), 5000)
+    return () => window.clearTimeout(timer)
+  }, [autoplay, nextImage])
+
+  return (
+    <div className="bento-tile bento-photo" role="group" aria-label="Fotos del catálogo"
+      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false) }}>
+      {photo ? (
+        <>
+          {nextImage && (
+            <div className="bento-photo-controls">
+              {!reducedMotion && <button type="button" aria-label={paused ? 'Reanudar rotación de fotos' : 'Pausar rotación de fotos'} onClick={() => setPaused(!paused)}>{paused ? <Play aria-hidden="true" size={16} /> : <Pause aria-hidden="true" size={16} />}</button>}
+              <button type="button" aria-label="Siguiente foto" onClick={() => setActiveImage(nextImage)}><FineArrow /></button>
+            </div>
+          )}
+          <Link href={`/productos/${photo.id}`} className="bento-photo-link" onMouseEnter={() => onCursor('Ver')} onMouseLeave={() => onCursor('')}>
+            <img key={photo.image} className="bento-photo-img" src={photo.image} alt="" onError={() => setFailedImages((previous) => new Set(previous).add(photo.image))} />
+            <span className="bento-badge">{photo.category}</span>
+            <span className="bento-photo-text" aria-live={autoplay ? 'off' : 'polite'} aria-atomic="true">
+              <strong>{photo.name}</strong>
+              <small>{photo.price === null ? 'Consultar' : money(finalPrice(photo, settings) ?? photo.price)}</small>
+            </span>
+          </Link>
+        </>
+      ) : <Link href="/productos" className="bento-photo-link"><span className="bento-photo-text"><strong>Ver catálogo</strong></span></Link>}
+    </div>
+  )
+}
 
 export default function Home() {
   const { data: products = initialProducts } = useSWR('/api/catalog', fetchCatalog, { fallbackData: initialProducts, revalidateOnFocus: true })
@@ -59,18 +112,16 @@ export default function Home() {
 
   // Los bestsellers son los primeros productos del catálogo. El orden se cambia en /admin.
   const featured = products.slice(0, 4)
-  const unique = products.filter((product, index, all) => all.findIndex((other) => other.image === product.image) === index)
-  const [tileFeature, tilePhoto, tileWa] = [unique[0] ?? products[0], unique[1] ?? products[1] ?? products[0], unique[2] ?? products[2] ?? products[0]]
-  const heroCategories = Array.from(new Set(products.map((product) => product.category))).slice(0, 4)
-  // Miniaturas para invitar al catálogo: los siguientes productos (o los primeros si hay pocos).
-  const teaser = (products.length > 8 ? products.slice(4, 9) : products.slice(0, 5))
+  const unique = products.filter((product, index, all) => product.image && all.findIndex((other) => other.image === product.image) === index)
+  const tileFeature = products.find((product) => product.id === settings.featuredProductId)
+  const photos = products === initialProducts ? unique : [...unique].reverse()
 
   return (
     <main className="home-page">
       <div className="cursor-dot" ref={cursorRef} aria-hidden="true" />
       <div className={`cursor-ring ${cursorText ? 'cursor-ring-active' : ''}`} ref={ringRef} aria-hidden="true">{cursorText}</div>
 
-      <div className="bento">
+      <div className={tileFeature ? 'bento' : 'bento bento-without-feature'}>
       <section className="hero2">
         <div className="hero2-orbit" aria-hidden="true" />
         <div className="hero2-visual" role="img" aria-label="Anillo dorado con diamante" />
@@ -102,17 +153,9 @@ export default function Home() {
         <span className="bento-link">Ver catálogo <ArrowRight size={14} strokeWidth={1.5} aria-hidden="true" /></span>
       </Link>
 
-      {tilePhoto && (
-        <Link href={`/productos/${tilePhoto.id}`} className="bento-tile bento-photo" onMouseEnter={() => setCursorText('Ver')} onMouseLeave={() => setCursorText('')}>
-          {/* Para usar un video propio: guárdalo como public/videos/joyas.mp4. Mientras no exista, se ve la foto. */}
-          <video className="bento-video" poster={tilePhoto.image} autoPlay muted loop playsInline preload="metadata" aria-label={tilePhoto.name}><source src="/videos/joyas.mp4" type="video/mp4" /></video>
-          <span className="bento-badge">{tilePhoto.category}</span>
-          <span className="bento-photo-text"><strong>{tilePhoto.name}</strong><small>{tilePhoto.price === null ? 'Consultar' : money(finalPrice(tilePhoto, settings) ?? tilePhoto.price)}</small></span>
-        </Link>
-      )}
+      {photos.length > 0 ? <CatalogPhotos photos={photos} settings={settings} onCursor={setCursorText} /> : <div className="bento-tile bento-photo"><p>No hay fotos del catálogo por ahora.</p></div>}
 
       <a href={whatsappLink('Hola, quiero conocer el catálogo de ZENIT Joyería', settings)} className="bento-tile bento-wa" target="_blank" rel="noreferrer">
-        {tileWa && <img src={tileWa.image} alt="" />}
         <span className="bento-label">Atención directa</span>
         <h3>¿Buscas algo <em>especial?</em></h3>
         <span className="bento-link">Escríbenos por WhatsApp <ArrowUpRight size={14} strokeWidth={1.5} aria-hidden="true" /></span>

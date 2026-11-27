@@ -141,3 +141,13 @@ Aquí anotamos cada modificación del proyecto con su fecha. Para agregar una en
 
 - Cambiar la contraseña de prueba `Admin` por una propia antes de publicar la tienda.
 - Completar los textos legales y los datos de contacto/redes del pie de página.
+
+---
+
+## 2026-11-27
+
+- Se agregaron al catálogo local 18 piezas con precio «Consultar» y costo 0, sin modificar los 17 registros anteriores.
+- La baldosa de fotos del inicio muestra piezas del catálogo con un fundido y controles de pausa y avance. Con movimiento reducido solo se cambia de foto manualmente.
+- En `/configuracion` se puede elegir una pieza destacada o dejar el inicio sin destacado. Ya no se muestra una medalla por defecto.
+- Cinco fotos se incorporaron con copias de nombre compatible con el catálogo. Los originales se conservaron.
+- Se corrigieron las rutas obsoletas y se retiraron las fichas con fotos repetidas. El catálogo local y el de respaldo muestran las mismas 21 fotos distintas, incluidas una sola medalla y una sola bolsita.
