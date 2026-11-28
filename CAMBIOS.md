@@ -151,3 +151,44 @@ Aquí anotamos cada modificación del proyecto con su fecha. Para agregar una en
 - En `/configuracion` se puede elegir una pieza destacada o dejar el inicio sin destacado. Ya no se muestra una medalla por defecto.
 - Cinco fotos se incorporaron con copias de nombre compatible con el catálogo. Los originales se conservaron.
 - Se corrigieron las rutas obsoletas y se retiraron las fichas con fotos repetidas. El catálogo local y el de respaldo muestran las mismas 21 fotos distintas, incluidas una sola medalla y una sola bolsita.
+
+---
+
+## 2026-11-28
+
+**Rediseño del catálogo (`/productos`)**
+
+- Se conserva la identidad (negro, dorado, Georgia y el logo), pero la página se rehízo por completo y ahora es compacta: en una laptop se ven 5 piezas completas al entrar.
+- Cabecera de una sola franja con el título «La colección».
+- Barra fija al bajar con las categorías en serif y su número de piezas (las vacías aparecen como «Pronto» y se ocultan en el celular), el número de piezas, el buscador (ignora tildes y mayúsculas) y el selector de orden (destacados, precio y nombre).
+- Si hay una pieza destacada en `/configuracion`, abre el catálogo.
+- Fotos cuadradas en una cuadrícula de 5 columnas en laptop y escritorio, 4 en pantallas de hasta 1280 px, 3 en tabletas y 2 en celular.
+- Tarjeta: nombre en serif, categoría, precio y una sola acción (Añadir, Consultar o Sin stock).
+- Cierre de la página con una frase de marca y un botón de asesoría por WhatsApp.
+- Animaciones: las fotos se revelan como una cortina al aparecer en pantalla, brillo dorado mientras cargan, y al pasar el ratón la foto se acerca, aparece un marco dorado y el botón «Ver pieza». Se desactivan con «movimiento reducido».
+- Se retiraron de `globals.css` las reglas antiguas del catálogo que ya no se usaban.
+
+**Transición entre el catálogo y la ficha**
+
+- Al abrir una pieza, su foto viaja desde la tarjeta hasta la ficha, mientras el resto de la página se desvanece y se desliza hacia la izquierda. Al usar «Volver al catálogo» ocurre lo contrario y la foto regresa a su tarjeta.
+- La cabecera queda quieta durante la transición. Al volver, las tarjetas aparecen sin repetir su animación de entrada.
+- Usa las transiciones de vista de React y Next.js (`lib/transitions.ts`). En navegadores sin soporte, la navegación funciona igual pero sin animación. Se desactiva con «movimiento reducido».
+
+**Navegación principal**
+
+- Iconos propios en lugar de los genéricos (casa, cuadrícula y globo): un destello para Inicio, cuatro rombos para Catálogo y un globo con destello para Contacto (`components/nav-icons.tsx`). Tienen trazo fino y se animan al pasar el ratón.
+- Textos en mayúsculas espaciadas. La página activa ya no es un bloque dorado relleno: se marca con un subrayado dorado y un pequeño rombo.
+- Contacto pasa a ser el botón de acción, con contorno dorado que se rellena al pasar el ratón. En celulares de hasta 420 px queda solo con su icono para que Catálogo conserve el texto.
+
+**Página principal**
+
+- Portada nueva a pantalla completa, sin recuadro: el anillo a la derecha con un brillo dorado suave y un destello de luz que lo cruza al cargar; a la izquierda, «Detalles que brillan contigo», los botones «Ver catálogo» y «Escríbenos por WhatsApp», y una línea con el número de diseños, la asesoría por WhatsApp y la entrega coordinada.
+- Se retiraron las baldosas (Todo el catálogo, el carrusel de fotos y Asesoría personal) y la sección de pasos «Cómo comprar».
+- Franja de piezas en movimiento continuo bajo la portada. Se detiene al pasar el ratón y cada foto lleva a su ficha. La pieza destacada de `/configuracion` aparece primero.
+- Los best sellers usan la misma tarjeta del catálogo nuevo (`components/catalog-card.tsx`, compartida con `/productos`): 5 piezas en escritorio y 4 en pantallas más pequeñas, con la misma transición de la foto hacia la ficha.
+- Cierre «¿Buscas algo especial?» con botón de WhatsApp y órbitas doradas girando despacio. Conserva el ancla `#contacto` del menú.
+- Se quitó el indicador animado de «bajar» al pie de la portada.
+
+**Ver el sitio desde el celular**
+
+- `next.config.mjs` permite en desarrollo las direcciones de la red local (`192.168.*.*` y `10.*.*.*`), para abrir el sitio desde el celular en la misma red Wi-Fi.
